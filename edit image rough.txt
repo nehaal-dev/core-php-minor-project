@@ -1,0 +1,92 @@
+
+<?php  
+ $conn=mysqli_connect("localhost","root","","rough_crud");
+
+ $id=$_GET['id'];
+
+$sql="SELECT * FROM picture WHERE id='$id'  ";
+$data=mysqli_query($conn,$sql);
+
+$result=mysqli_fetch_array($data);
+ 
+
+if(isset($_POST['edit'])){
+    $image_id=$_POST['id'];
+    $Name=$_POST['name'];
+
+    
+    $new_image=$_FILES['image']['name'];
+    $old_image=$_POST['image_old'];
+
+
+//if user enter an image update old image with new image else let it be old image.
+if($new_image !=''){
+    
+   $update_filename=$new_image;
+
+}else{
+    $update_filename=$old_image; //agr new image null rhta h mtlb hm koi nya image nhi lete/image update nhi k to old wala image hi rhne do.
+ 
+}
+
+$esql="UPDATE picture SET name='$Name',image='$update_filename' WHERE id='$image_id'  ";
+
+$A=mysqli_query($conn,$esql);
+
+
+if($A){
+//image succesfully update hone k bad use kro move_uploaded_file($tmp_filename ,$destination ) to particular folder. 
+       if($_FILES['image']['name'] !=''){
+         move_uploaded_file($_FILES['image']['tmp_name'],"upload/".$_FILES['image']['name']);
+         unlink("upload/".$old_image);//new image update hone k bad old wala image delete hojaye upload folder se.
+       }
+               echo "image updated sucessfully";
+               header("location:list.php");
+}else{
+    echo "image updation failed";
+    header("location:edit.php");
+}
+
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <h1>IMAGE CRUD</h1>
+</head>
+
+<body>
+    <form action="" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<?php echo $result['id']; ?>">
+        Name: <input type="text" name="name" value="<?php echo $result['name']; ?>"> <br><br>
+
+        Image: <input type="file" name="image"> <br><br>
+        <input type="hidden" name="image_old" value="<?php echo $result['image'];  ?> ">
+        <img src="<?php echo "upload/".$result['image']; ?>" width="100px" height="80px">
+        <br><br>
+        <button name="edit" class="btn btn-primary">Edit</button>
+    </form>
+</body>
+
+</html>
+
+
+ if ($stmt->execute()) {
+        if ($new_image) {
+            move_uploaded_file($_FILES['image']['tmp_name'], "upload/" . $new_image);
+            if (file_exists("upload/" . $old_image)) {
+                unlink("upload/" . $old_image);
+            }
+        }
+        header("Location: list.php");
+        exit;
+    } else {
+        echo "Image updation failed";
+        header("Location: edit.php");
+        exit;
+    }
